@@ -36,13 +36,15 @@ function fetch {
 
     > $STATE_FILE  # Empty the state file for new data
 
+    expected_format="^([^:]+:[0-9]+)\s+#\s+(.*)$"
+    
     while IFS= read -r input_line
     do
         # Check if the line matches the expected format
-        if [[ ! "$input_line" =~ ^[^#]+:[0-9]+\s+#\s+\S+$ ]]; then
+        if [[ ! "$input_line" =~ $regex ]]; then
             continue  # Skip processing this line
         fi
-        
+
         hostport=$(echo $input_line | awk '{print $1}' | tr ':' '/')
         label=$(echo $input_line | awk '{print $3}')
 
@@ -68,7 +70,7 @@ case $1 in
     config)
         config
         ;;
-    *)  
+    *)
         fetch
         ;;
 esac
