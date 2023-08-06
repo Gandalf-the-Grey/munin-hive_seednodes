@@ -5,8 +5,8 @@ FILE_PATH="/etc/munin/seednodes.txt"
 STATE_FILE="/var/lib/munin-node/plugin-state/nobody/hive-seednodes.st"
 
 function config {
-    echo "graph_title Hive Seed Nodes SLA"
-    echo "graph_vlabel Success Ratio"
+    echo "graph_title Hive Seed Nodes Availability"
+    echo "graph_vlabel Availability"
     echo "graph_category network"
     echo "graph_scale no"
     while IFS= read -r line
@@ -15,7 +15,7 @@ function config {
         echo "${label}.label ${label}"
         echo "${label}.draw LINE2"
         echo "${label}.min 0"
-        echo "${label}.max 1"
+        echo "${label}.max 100"
     done < "$FILE_PATH"
 }
 
@@ -60,9 +60,9 @@ function fetch {
         # Save new data by the label
         echo "$label $success $total" >> $STATE_FILE
 
-        # Output ratio
-        ratio=$(echo "$success $total" | awk '{printf "%.2f", $1/$2}')
-        echo "${label}.value $ratio"
+        # Output availability as percentage
+        availability=$(echo "$success $total" | awk '{printf "%.2f", ($1/$2)*100}')
+        echo "${label}.value $availability"        
     done < "$FILE_PATH"
 }
 
