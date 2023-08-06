@@ -40,6 +40,11 @@ function fetch {
 
     while IFS= read -r input_line
     do
+        # Check if the line matches the expected format
+        if [[ ! "$input_line" =~ ^[^#]+:[0-9]+\s+#\s+\S+$ ]]; then
+            continue  # Skip processing this line
+        fi
+        
         hostport=$(echo $input_line | awk '{print $1}' | tr ':' '/')
         label=$(echo $input_line | awk '{print $3}')
 
