@@ -4,6 +4,10 @@
 FILE_PATH="/etc/munin/seednodes.txt"
 STATE_FILE="/var/lib/munin-node/plugin-state/nobody/hive-seednodes.st"
 
+sanitize_label() {
+    echo "$1" | tr '.' '_'
+}
+
 function config {
     echo "graph_title Hive Seed Nodes Availability"
     echo "graph_vlabel Availability"
@@ -11,7 +15,7 @@ function config {
     echo "graph_scale no"
     while IFS= read -r line
     do
-        label=$(echo $line | awk '{print $3}')
+        label=$(sanitize_label "$(echo $line | awk '{print $3}')")
         echo "${label}.label ${label}"
         echo "${label}.draw LINE2"
         echo "${label}.min 0"
@@ -46,7 +50,7 @@ function fetch {
         fi
 
         hostport=$(echo $input_line | awk '{print $1}' | tr ':' '/')
-        label=$(echo $input_line | awk '{print $3}')
+        label=$(sanitize_label "$(echo $input_line | awk '{print $3}')")
 
         total="${old_total[$label]:-0}"
         success="${old_success[$label]:-0}"
