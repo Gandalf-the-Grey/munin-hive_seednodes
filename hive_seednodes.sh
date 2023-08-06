@@ -34,9 +34,7 @@ function fetch {
         done < "$STATE_FILE"
     fi
 
-    if [[ ! -f $STATE_FILE ]]; then
-        touch $STATE_FILE
-    fi
+    > $STATE_FILE  # Empty the state file for new data
 
     while IFS= read -r input_line
     do
