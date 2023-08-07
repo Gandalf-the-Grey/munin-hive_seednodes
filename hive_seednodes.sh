@@ -13,6 +13,12 @@ function config {
     echo "graph_vlabel Availability"
     echo "graph_category network"
     echo "graph_scale no"
+    echo "health.label health"
+    echo "health.draw LINE2"
+    echo "health.colour 00FF00"
+    echo "health.linewidth 2"
+    echo "health.min 0"
+    echo "health.max 100"
     echo "average.label average"
     echo "average.draw LINE2"
     echo "average.min 0"
@@ -46,6 +52,8 @@ function fetch {
 
     expected_format="^([^:]+:[0-9]+)\s+#\s+(.*)$"
 
+# desired_health is based on GRAPHENE_NET_DEFAULT_DESIRED_CONNECTIONS
+    desired_health=20
     sum_availability=0
     count=0
     while IFS= read -r input_line
@@ -80,6 +88,10 @@ function fetch {
     # Calculate and output the average
     average=$(echo "$sum_availability $count" | awk '{printf "%.2f", $1 / $2}')
     echo "average.value $average"
+
+    # Calculate and output the health
+    health_percentage=$(echo "$sum_availability $desired_health" | awk '{printf "%.2f", $1 / $2}')
+    echo "health.value $health_percentage"
 }
 
 case $1 in
