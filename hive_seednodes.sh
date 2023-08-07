@@ -13,6 +13,10 @@ function config {
     echo "graph_vlabel Availability"
     echo "graph_category network"
     echo "graph_scale no"
+    echo "average.label average"
+    echo "average.draw LINE2"
+    echo "average.min 0"
+    echo "average.max 100"
     while IFS= read -r line
     do
         label=$(sanitize_label "$(echo $line | awk '{print $3}')")
@@ -41,7 +45,9 @@ function fetch {
     > $STATE_FILE  # Empty the state file for new data
 
     expected_format="^([^:]+:[0-9]+)\s+#\s+(.*)$"
-    
+
+    sum_availability=0
+    count=0
     while IFS= read -r input_line
     do
         # Check if the line matches the expected format
@@ -66,8 +72,14 @@ function fetch {
 
         # Output availability as percentage
         availability=$(echo "$success $total" | awk '{printf "%.2f", ($1/$2)*100}')
-        echo "${label}.value $availability"        
+        sum_availability=$(echo "$sum_availability $availability" | awk '{printf "%.2f", $1 + $2}')
+        count=$((count+1))
+        echo "${label}.value $availability"
     done < "$FILE_PATH"
+
+    # Calculate and output the average
+    average=$(echo "$sum_availability $count" | awk '{printf "%.2f", $1 / $2}')
+    echo "average.value $average"
 }
 
 case $1 in
